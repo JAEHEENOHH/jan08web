@@ -8,42 +8,94 @@
 <link href="./css/index.css" rel="stylesheet" />
 <link href="./css/menu.css" rel="stylesheet" />
 <link href="./css/detail.css" rel="stylesheet" />
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+<link rel="stylesheet"
+	href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
 <script type="text/javascript" src="./js/menu.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+	integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+	crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript">
 function del(){var ch = confirm("글을 삭제하시겠습니까?");if(ch){location.href="./delete?no=${detail.no }";}}
 function update(){if(confirm("수정하시겠습니까?")){location.href="./update?no=${detail.no }";}}
 //function commentDel(cno){if(confirm("댓글을 삭제하시겠습니까?")){location.href='./commentDel?no=${detail.no}&cno='+cno;}}
-
 $(document).ready(function(){
 	
 	$(".commentEdit").click(function(){
 		if(confirm('수정하시겠습니까?')){
-			//필요한 값 cno 잡기 / 수정한 내용 + 로그인 === 서블릿에서 정리
-			let cno = $(this).siblings(".cno").val(); 
-			let comment = $(this).parents(".chead").next().text();  //next() 에서 가져오는건 <div class="chead"> 밑 <div class= "ccomment"> 
-			alert(cno + " : " + comment);
+			let cno = $(this).siblings(".cno").val();
+			let comment = $(this).parents(".chead").next();
+			$(this).prev().hide();
+			$(this).hide();
+			comment.css('height','110');
+			comment.css('padding-top','10px');
+			comment.css('backgroundColor','#c1c1c1');
+			let commentChange = comment.html().replaceAll("<br>", "\r\n");
+			let recommentBox = '<div class="recommentBox">';
+			recommentBox += '<textarea class="commentcontent" name="comment">' + commentChange + '</textarea>'; 
+			recommentBox += '<input type="hidden" name="cno" value="' + cno + '">';
+			recommentBox += '<button class="comment-btn">댓글 수정</button>';
+			recommentBox += '</div>';
+			
+			comment.html(recommentBox);
 		}
 	});
 	
-	//댓글 삭제 버튼을 눌렀습니다.
 	
+	//댓글수정 ( .comment-btn 버튼 눌렀을 때 .cno 값, .commentcontent 값 가져오는 명령 만들기(제이쿼리로 잡기))
+	//2024-01-25
+			$(document).on('click',".comment-btn", function (){
+			if(confirm('수정하시겠습니까?')){
+			let cno = $(this).prev().val();
+			let recomment = $('.commentcontent').val();
+			let comment = $(this).parents(".ccomment");//댓글 위치
+			
+			$.ajax({
+				url : './recomment',     /* Recomment.java(post)에서 실행 */
+				type : 'post',
+				dataType : 'text',
+				data : {'cno': cno, 'comment': recomment},
+				success : function(result){
+					//alert('통신 성공 : ' + result);
+					if(result == $1){
+						//수정된 데이터를 화면에 보여주면 되요.
+						$(this).parent(".recommentBox").remove();
+						comment.css('backgroundColor','ffffff');
+						comment.css('min-height','100px');
+						comment.css('height','auto');	
+						comment.html(recomment.replace(/(?:\r\n|\r|\n)/g, '<br>'));
+						$(".commentDelete").show();
+						$(".commentEdit").show();
+					} else {
+						alert("문제가 발생했습니다. 화면을 갱신합니다.");
+						//location.href='./detail?page=${param.page}&no=${param.no}';
+						location.href='./detail?page=${param.page}&no=${detail.no}'; //param : url에 있는 주소 그대로 가져오기
+					}
+				},
+				error : function(error){
+					alert('문제가 발생했습니다. : ' + error);
+				}
+			});
+		}
+		
+	});
+
+	
+	//댓글 삭제 버튼을 눌렀습니다.
+	$(".commentDelete").click(function(){
 		//alert("삭제버튼을 눌렀습니다");
 		//부모객체 찾아가기 = this
-		//$(this).parent(".cname").css('color', 'green'); //댓글 옆에 삭제 버튼 아이콘 누르면 글자가 초록색으로 바뀜
+		//$(this).parent(".cname").css('color', 'green');
 		//let text = $(this).parent(".cname").text(); //val()? text() html()
 		//부모요소 아래 자식요소 찾기 children()
-		//let cno = $(this).parent().children(".cno").val(); //댓글 출력창(삭제,수정 써있는 코드) 부모(상위) 폴더 찾기
+		//let cno = $(this).parent().children(".cno").val();
 		//형제요소 찾기 .siblings() .prev() 바로 이전  .next() 바로 다음
-		//let cno = $(this).siblings(".cno").val(); //댓글 출력창(삭제,수정 써있는 코드) 위에 폴더 값 찾기
+		//let cno = $(this).siblings(".cno").val();
 		
-		$(".commentDelete").click(function(){
 		if(confirm("삭제 하시겠습니까?")){
 			let cno = $(this).prev().val();
-			let point = $(this).closest(".comment");  //
-			
-			//ajax(@WebServlet("/commentDel").java에서 post에서 실행시키기)
+			//ajax
+			let point = $(this).closest(".comment");					
 			$.ajax({
 				url : './commentDel',   //주소
 				type : 'post',          //get, post
@@ -59,11 +111,11 @@ $(document).ready(function(){
 				error:function(request, status, error){//통신 오류
 					alert("문제가 발생했습니다.");
 				}
-			});
+			});//end ajax
 		}
 		
-			
-
+		
+		
 	});
 	
 	
@@ -94,6 +146,17 @@ $(document).ready(function(){
 		}
 	});//댓글쓰기 동적생성 끝
 	
+	//id="commentcontent"
+	//id="comment-btn"
+	//댓글쓰기 창에 쓸 수 있는 글자 표시해주고 넘어가면 더이상 입력 불가로 바꾸기
+	$("#commentcontent").keyup(function(){
+        let text = $(this).val();
+        if(text.length > 100){
+           alert("100자 넘었어요.");
+           $(this).val(  text.substr(0, 100)   );   
+        }
+        $("#comment-btn").text("글쓰기 " + text.length +  "/100");
+     });
 	
 });
 </script>
@@ -110,36 +173,40 @@ $(document).ready(function(){
 						<div class="detailTITLE">${detail.title }</div>
 						<div class="detailWRITECOUNT">
 							<div class="detailWRITE">
-							${detail.write }<c:if test="${sessionScope.mname ne null && detail.mid eq sessionScope.mid }">
-								<img alt="삭제" src="./img/delete.png" onclick="del()">
-								<img alt="수정" src="./img/edit.png" onclick="update()"></c:if>
+								${detail.write }
+								<c:if test="${sessionScope.mname ne null && detail.mid eq sessionScope.mid }">
+									<img alt="삭제" src="./img/delete.png" onclick="del()">
+									<img alt="수정" src="./img/edit.png" onclick="update()">
+								</c:if>
 							</div>
-							<div class="detailCOUNT">${detail.ip } / ${detail.count }</div>
+							<div class="detailCOUNT">${detail.ip }/ ${detail.count }</div>
 						</div>
 						<div class="detailCONTENT">${detail.content }</div>
 					</div>
 					<c:if test="${sessionScope.mid ne null }">
-					<button class="xi-comment-o">댓글쓰기</button>
-					<!-- 댓글쓰는 창을 여기다가 만들어주겠습니다. 댓글내용, 누가, 어느, 2024-01-22 -->
-					<div class="comment-write">
-						<div class="comment-form">
-							<textarea id="commentcontent"></textarea>
-							<button id="comment-btn">댓글쓰기</button>
-						</div>
-					</div></c:if>
+						<button class="xi-comment-o">댓글쓰기</button>
 					
+						<!-- 댓글쓰는 창을 여기다가 만들어주겠습니다. 댓글내용, 누가, 어느, 2024-01-22 -->
+						<div class="comment-write">
+							<div class="comment-form">
+								<textarea id="commentcontent"></textarea>
+								<button id="comment-btn">댓글쓰기</button>
+							</div>
+						</div>
+					</c:if>
+
 					<!-- 댓글 출력창 -->
 					<div class="comments">
 						<c:forEach items="${commentList }" var="co">
 							<div class="comment">
 								<div class="chead">
 									<div class="cname">${co.mname }님<c:if test="${sessionScope.mname ne null && co.mid eq sessionScope.mid }">
-										<input type="hidden" class="cno" value="${co.cno }"> 
-										<img alt="삭제" src="./img/delete.png" class="commentDelete">
-										<img alt="수정" src="./img/edit.png" class="commentEdit">
+											<input type="hidden" class="cno" value="${co.cno }">
+											<img alt="삭제" src="./img/delete.png" class="commentDelete">
+											<img alt="수정" src="./img/edit.png" class="commentEdit">
 										</c:if>
 									</div>
-									<div class="cdate">${co.ip} / ${co.cdate }</div>
+									<div class="cdate">${co.ip}/ ${co.cdate }</div>
 								</div>
 								<div class="ccomment">${co.comment }</div>
 							</div>
@@ -150,7 +217,7 @@ $(document).ready(function(){
 			</div>
 		</div>
 		<footer>
-		<c:import url="footer.jsp"/>
+			<c:import url="footer.jsp" />
 		</footer>
 	</div>
 </body>

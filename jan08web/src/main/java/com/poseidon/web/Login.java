@@ -55,13 +55,7 @@ public class Login extends HttpServlet {
 			
 			LogDAO logDAO = new LogDAO();
 			logDAO.write(log);
-			
-			
-			
-			
-			
-			
-			
+
 			if(dto.getCount() == 1) {
 				System.out.println("정상 로그인");
 				//세션만들기

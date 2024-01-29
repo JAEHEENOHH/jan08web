@@ -3,7 +3,7 @@ package com.poseidon.dto;
 import com.poseidon.util.Util;
 
 public class BoardDTO {
-	private int no, count, comment;
+	private int no, count, comment, Del;
 	private String title, content, write, date, mid, ip;
 
 	public int getNo() {
@@ -12,6 +12,10 @@ public class BoardDTO {
 
 	public void setNo(int no) {
 		this.no = no;
+	}
+
+	public int getDel() {
+		return Del;
 	}
 
 	public int getCount() {
@@ -76,6 +80,11 @@ public class BoardDTO {
 
 	public void setIp(String ip) {
 		this.ip = ip;
+	}
+
+	public void setDel(int int1) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

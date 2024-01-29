@@ -123,7 +123,7 @@ public class BoardDAO extends AbstractDAO {
 		Connection con = db.getConnection();
 		PreparedStatement pstmt = null;
 		String sql = "INSERT INTO board (board_title, board_content, mno, board_ip) "
-				+ "VALUES(?,?,(SELECT mno FROM member WHERE mid=?), ?)";// 수정완
+				+ "VALUES(?,?,(SELECT mno FROM member WHERE mid=?), ?)";
 
 		try {
 			pstmt = con.prepareStatement(sql);
